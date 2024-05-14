@@ -9,7 +9,7 @@ Resources:
       Name: /AMATI/Wordpress/DBUser
       Description: Wordpress Database User
       Type: String
-      Value: hdnwordpressuser
+      Value: amatiwordpressuser
 
   DBNameParameter:
     Type: AWS::SSM::Parameter
@@ -17,7 +17,7 @@ Resources:
       Name: /AMATI/Wordpress/DBName
       Description: Wordpress Database Name
       Type: String
-      Value: hdnwordpressdb
+      Value: amatiwordpressdb
 
   DBEndpointParameter:
     Type: AWS::SSM::Parameter
@@ -27,6 +27,13 @@ Resources:
       Type: String
       Value: rds_endpoint
 
+  EFSFSIDParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /AMATI/Wordpress/EFSFSID
+      Description: Endpoint for the Wordpress Database
+      Type: String
+      Value: fs_id
 
 
 
@@ -44,10 +51,6 @@ Outputs:
     Description: "The name of the SSM Parameter for DB Endpoint"
     Value: !Ref DBEndpointParameter
 
-  DBPasswordSecretName:
-    Description: "The name of the Secrets Manager secret for DB Password"
-    Value: !Ref DBPasswordSecret
-
-  DBRootPasswordSecretName:
-    Description: "The name of the Secrets Manager secret for DB Root Password"
-    Value: !Ref DBRootPasswordSecret
+  EFSFSIDParameterName:
+    Description: "The name of the SSM Parameter for EFS FS ID"
+    Value: !Ref EFSFSIDParameter
