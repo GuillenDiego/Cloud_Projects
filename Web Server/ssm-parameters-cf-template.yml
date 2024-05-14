@@ -25,21 +25,11 @@ Resources:
       Name: /AMATI/Wordpress/DBEndpoint
       Description: Endpoint for the Wordpress Database
       Type: String
-      Value: database-1.ctw284w24nd1.us-east-1.rds.amazonaws.com
+      Value: rds_endpoint
 
-  DBPasswordSecret:
-    Type: AWS::SecretsManager::Secret
-    Properties:
-      Name: /AMATI/Wordpress/DBPassword
-      Description: Wordpress DB Password
-      SecretString: '{"DBPassword": "h0d4nF1L35"}'
 
-  DBRootPasswordSecret:
-    Type: AWS::SecretsManager::Secret
-    Properties:
-      Name: /AMATI/Wordpress/DBRootPassword
-      Description: Wordpress DBRoot Password
-      SecretString: '{"DBRootPassword": "h0d4nF1L35"}'
+
+
 
 Outputs:
   DBUserParameterName:
