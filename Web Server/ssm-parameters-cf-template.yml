@@ -1,0 +1,63 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation template to create WordPress configuration parameters in AWS Secrets Manager.
+
+Resources:
+
+  DBUserParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /AMATI/Wordpress/DBUser
+      Description: Wordpress Database User
+      Type: String
+      Value: hdnwordpressuser
+
+  DBNameParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /AMATI/Wordpress/DBName
+      Description: Wordpress Database Name
+      Type: String
+      Value: hdnwordpressdb
+
+  DBEndpointParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /AMATI/Wordpress/DBEndpoint
+      Description: Endpoint for the Wordpress Database
+      Type: String
+      Value: database-1.ctw284w24nd1.us-east-1.rds.amazonaws.com
+
+  DBPasswordSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: /AMATI/Wordpress/DBPassword
+      Description: Wordpress DB Password
+      SecretString: '{"DBPassword": "h0d4nF1L35"}'
+
+  DBRootPasswordSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: /AMATI/Wordpress/DBRootPassword
+      Description: Wordpress DBRoot Password
+      SecretString: '{"DBRootPassword": "h0d4nF1L35"}'
+
+Outputs:
+  DBUserParameterName:
+    Description: "The name of the SSM Parameter for DB User"
+    Value: !Ref DBUserParameter
+
+  DBNameParameterName:
+    Description: "The name of the SSM Parameter for DB Name"
+    Value: !Ref DBNameParameter
+
+  DBEndpointParameterName:
+    Description: "The name of the SSM Parameter for DB Endpoint"
+    Value: !Ref DBEndpointParameter
+
+  DBPasswordSecretName:
+    Description: "The name of the Secrets Manager secret for DB Password"
+    Value: !Ref DBPasswordSecret
+
+  DBRootPasswordSecretName:
+    Description: "The name of the Secrets Manager secret for DB Root Password"
+    Value: !Ref DBRootPasswordSecret
