@@ -9,7 +9,7 @@ Resources:
       Name: /AMATI/Wordpress/DBUser
       Description: Wordpress Database User
       Type: String
-      Value: amatiwordpressuser
+      Value: atiwordpressuser
 
   DBNameParameter:
     Type: AWS::SSM::Parameter
@@ -17,7 +17,7 @@ Resources:
       Name: /AMATI/Wordpress/DBName
       Description: Wordpress Database Name
       Type: String
-      Value: amatiwordpressdb
+      Value: atiwordpressdb
 
   DBEndpointParameter:
     Type: AWS::SSM::Parameter
@@ -31,9 +31,11 @@ Resources:
     Type: AWS::SSM::Parameter
     Properties:
       Name: /AMATI/Wordpress/EFSFSID
-      Description: Endpoint for the Wordpress Database
+      Description: ID for the Wordpress FileSystem
       Type: String
       Value: fs_id
+
+
 
 
 

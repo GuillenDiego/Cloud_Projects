@@ -16,7 +16,7 @@ sudo systemctl enable httpd
 # Retrieve DB passwords from AWS Secrets Manager
 # DBPassword=$(aws secretsmanager get-secret-value --region us-east-1 --secret-id /AMATI/Wordpress/DBPassword --query SecretString --output text | jq -r .DBPassword)
 DBUser=$(aws ssm get-parameters --region us-east-1 --names /AMATI/Wordpress/DBUser --query Parameters[0].Value --output text)
-DBPassword=$(aws ssm get-parameters --region us-east-1 --names /AMATI/Wordpress/DBPassword --query Parameters[0].Value --output text)
+DBPassword=$(aws ssm get-parameters --region us-east-1 --names /AMATI/Wordpress/DBPassword --with-decryption  --query Parameters[0].Value --output text)
 DBName=$(aws ssm get-parameters --region us-east-1 --names /AMATI/Wordpress/DBName --query Parameters[0].Value --output text)
 DBEndpoint=$(aws ssm get-parameters --region us-east-1 --names /AMATI/Wordpress/DBEndpoint --query Parameters[0].Value --output text)
 
