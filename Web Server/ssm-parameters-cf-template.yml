@@ -25,7 +25,7 @@ Resources:
       Name: /AMATI/Wordpress/DBEndpoint
       Description: Endpoint for the Wordpress Database
       Type: String
-      Value: wordpress-db.cny840myqm67.us-east-1.rds.amazonaws.com
+      Value: wordpress-db.c9yqayewa1xq.us-east-1.rds.amazonaws.com
 
   EFSFSIDParameter:
     Type: AWS::SSM::Parameter
@@ -33,7 +33,7 @@ Resources:
       Name: /AMATI/Wordpress/EFSFSID
       Description: ID for the Wordpress FileSystem
       Type: String
-      Value: fs-02e35ba753a43784e
+      Value: fs-0ffe841f48ca16c32
 
 
 
