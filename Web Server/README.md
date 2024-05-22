@@ -59,23 +59,26 @@ By leveraging AWS's robust cloud infrastructure and services, we will deliver a 
 
 ## Implementation
 
-###### Architecture
+##### Architecture
+The architecture below is a well-structured, cost-effective AWS cloud deployment specifically tailored for a WordPress application in the US-East-1 region. It encompasses a Virtual Private Cloud (VPC) with an Internet Gateway, ensuring connectivity to and from the internet. Within this VPC, there are three public subnets, which host the EC2 instances running the WordPress application. These instances are managed by an Auto Scaling Group (ASG) to ensure scalability and reliability, adjusting the number of instances based on load to maintain performance while optimizing costs. An Application Load Balancer (ALB) distributes incoming traffic across these instances to enhance availability and fault tolerance.
 
-![Web Server.png](C:\Users\Dguillen\Documents\Projects\Cloud\Cloud_Projects\Web%20Server\Web%20Server.png)
+Additionally, the architecture includes three private application subnets where the Amazon Elastic File System (EFS) mount targets are located. This setup allows for shared file storage across the EC2 instances, facilitating a consistent and stateful deployment of WordPress resources like media files and themes across multiple servers. For database needs, a single Amazon RDS MySQL instance resides in one of the private subnets (DB A), which is isolated from direct internet access, enhancing security. This arrangement supports a robust, secure, and cost-efficient infrastructure for a WordPress-based portfolio project, ensuring that it can handle varying loads with minimal manual intervention.
 
-###### VPC
+![Web Server.png](https://github.com/GuillenDiego/Cloud_Projects/blob/main/Web%20Server/Web%20Server.png?raw=true)
 
-###### RDS MySQL Database
+##### VPC
 
-###### EFS File System
+##### RDS MySQL Database
 
-###### Systems Manager Parameter Store
+##### EFS File System
 
-###### EC2 Amazon Load Balancer
+##### Systems Manager Parameter Store
 
-###### EC2 AutoScaling
+##### EC2 Amazon Load Balancer
 
-###### 
+##### EC2 AutoScaling
+Upload
+
 
 ### User Data
 
