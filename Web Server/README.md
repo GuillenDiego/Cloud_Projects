@@ -59,6 +59,10 @@ By leveraging AWS's robust cloud infrastructure and services, we will deliver a 
 
 ## Implementation
 
+###### Architecture
+
+![Web Server.png](C:\Users\Dguillen\Documents\Projects\Cloud\Cloud_Projects\Web%20Server\Web%20Server.png)
+
 ###### VPC
 
 ###### RDS MySQL Database
