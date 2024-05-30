@@ -45,6 +45,18 @@ Resources:
       SubnetId: !Ref SNPUBA
       RouteTableId:
         Ref: RTPub
+  RTAssociationPubB:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !Ref SNPUBB
+      RouteTableId:
+        Ref: RTPub
+  RTAssociationPubC:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !Ref SNPUBC
+      RouteTableId:
+        Ref: RTPub
   SNDBA:
     Type: AWS::EC2::Subnet
     # DependsOn: IPv6CidrBlock
