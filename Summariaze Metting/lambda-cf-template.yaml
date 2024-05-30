@@ -78,6 +78,8 @@ Resources:
     Properties:
       BucketName: !Sub 'recordings-summarizer-bucket${AWS::AccountId}'
 
+
+
 Outputs:
   LambdaFunctionName:
     Description: 'Name of the Lambda function created for meeting summarization'

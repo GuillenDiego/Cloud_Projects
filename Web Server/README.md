@@ -1,7 +1,9 @@
 # "Amati Marketing" Web Server
+
 To read the full step-by-step guide go to https://diegoguillen.notion.site/Web-Server-b8300e70c67c4ea2891e59b8171ec341
 
 ### Architecture
+
 ![WebServer.png](https://github.com/GuillenDiego/Cloud_Projects/blob/main/Web%20Server/WebServer.png?raw=true)
 
 The architecture is a well-structured, cost-effective AWS cloud deployment specifically tailored for a WordPress application in the US-East-1 region. It encompasses a Virtual Private Cloud (VPC) with an Internet Gateway, ensuring connectivity to and from the internet. Within this VPC, there are three public subnets, which host the EC2 instances running the WordPress application. These instances are managed by an Auto Scaling Group (ASG) to ensure scalability and reliability, adjusting the number of instances based on load to maintain performance while optimizing costs. An Application Load Balancer (ALB) distributes incoming traffic across these instances to enhance availability and fault tolerance.
@@ -56,7 +58,6 @@ We have been contracted to develop a new website for Amati Marketing. The archit
 2. **Independent Scalability**:
    
    Each component (EC2, EFS, RDS) can scale independently. EC2 instances scale horizontally through the ASG, EFS scales automatically with the storage needs, and RDS can scale vertically or horizontally (read replicas) depending on the database workload.
-
 
 ### User Data
 
@@ -153,6 +154,7 @@ sudo find /var/www/html -type f -exec chmod 0664 {} \;
 
 echo "WordPress installation completed successfully."
 ```
+
 ### Expected Outcomes
 
 - Enhanced user experience due to reduced load times and improved website responsiveness.
