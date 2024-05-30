@@ -1,22 +1,14 @@
 # "Amati Marketing" Web Server
+To read the full step-by-step guide go to https://diegoguillen.notion.site/Web-Server-b8300e70c67c4ea2891e59b8171ec341
 
-### Client Background
+### Architecture
+![WebServer.png](https://github.com/GuillenDiego/Cloud_Projects/blob/main/Web%20Server/WebServer.png?raw=true)
 
-Amati Marketing, a rapidly growing digital marketing agency, is looking to overhaul its existing website to support its expanding portfolio and customer base. They require a highly resilient and scalable website that can handle significant traffic fluctuations and provide robust data management capabilities.
+The architecture is a well-structured, cost-effective AWS cloud deployment specifically tailored for a WordPress application in the US-East-1 region. It encompasses a Virtual Private Cloud (VPC) with an Internet Gateway, ensuring connectivity to and from the internet. Within this VPC, there are three public subnets, which host the EC2 instances running the WordPress application. These instances are managed by an Auto Scaling Group (ASG) to ensure scalability and reliability, adjusting the number of instances based on load to maintain performance while optimizing costs. An Application Load Balancer (ALB) distributes incoming traffic across these instances to enhance availability and fault tolerance.
 
-### Project Overview
+Additionally, the architecture includes three private application subnets where the Amazon Elastic File System (EFS) mount targets are located. This setup allows for shared file storage across the EC2 instances, facilitating a consistent and stateful deployment of WordPress resources like media files and themes across multiple servers. For database needs, a single Amazon RDS MySQL instance resides in one of the private subnets (DB A), which is isolated from direct internet access, enhancing security. This arrangement supports a robust, secure, and cost-efficient infrastructure for a WordPress-based portfolio project, ensuring that it can handle varying loads with minimal manual intervention.
 
-We have been contracted to develop a new website for Amati Marketing. The architecture designed showcases a robust adherence to four key pillars of the AWS Well-Architected Framework: Operational Excellence, Reliability, Performance Efficiency, and Cost Optimization. **Operational Excellence** is exemplified through the implementation of Auto Scaling Groups (ASG) for EC2 instances and an Application Load Balancer (ALB) which automates traffic routing and supports a monitoring-driven environment to maintain consistent performance and quick recovery from any operational failures. **Reliability** is ensured by deploying across multiple subnets, which enhances fault tolerance and ensures high availability; this setup helps mitigate the risks associated with single points of failure, as other subnets can continue operating if one fails. **Performance Efficiency** is achieved by using an ALB to distribute incoming traffic across multiple EC2 instances, which efficiently handles the load and allows for scalability based on demand. Finally, **Cost Optimization** is addressed by the Auto Scaling mechanism that adjusts the number of instances in response to real-time demand, ensuring cost efficiency by paying only for the resources that are needed. This thoughtful configuration highlights a well-planned infrastructure that optimizes both resource use and operational costs. This architecture also complies with decoupling and independent scalability:
-
-1. **Decoupling**:
-   
-   The architecture demonstrates decoupling by separating the presentation layer (EC2 instances in public subnets), the application layer (EFS in app subnets), and the data layer (RDS in a private subnet). This separation ensures that components can fail or scale independently without impacting others.
-
-2. **Independent Scalability**:
-   
-   Each component (EC2, EFS, RDS) can scale independently. EC2 instances scale horizontally through the ASG, EFS scales automatically with the storage needs, and RDS can scale vertically or horizontally (read replicas) depending on the database workload.
-
-### Technical Specifications
+#### Technical Specifications
 
 - **Web Hosting Service**: Amazon Web Services (AWS)
   
@@ -49,37 +41,22 @@ We have been contracted to develop a new website for Amati Marketing. The archit
 
 This specification provides a comprehensive view of how various AWS services are orchestrated to create a scalable, secure, and efficient cloud infrastructure for your web application.
 
-### Expected Outcomes
+### Client Background
 
-- Enhanced user experience due to reduced load times and improved website responsiveness.
-- Increased uptime and availability, ensuring that the website is always accessible to users.
-- Scalability to handle peak loads during high traffic periods without compromising on performance.
+Amati Marketing, a rapidly growing digital marketing agency, is looking to overhaul its existing website to support its expanding portfolio and customer base. They require a highly resilient and scalable website that can handle significant traffic fluctuations and provide robust data management capabilities.
 
-By leveraging AWS's robust cloud infrastructure and services, we will deliver a resilient, scalable, and high-performance website that aligns with the dynamic needs of Amati Marketing.
+### Project Overview
 
-## Implementation
+We have been contracted to develop a new website for Amati Marketing. The architecture designed showcases a robust adherence to four key pillars of the AWS Well-Architected Framework: Operational Excellence, Reliability, Performance Efficiency, and Cost Optimization. **Operational Excellence** is exemplified through the implementation of Auto Scaling Groups (ASG) for EC2 instances and an Application Load Balancer (ALB) which automates traffic routing and supports a monitoring-driven environment to maintain consistent performance and quick recovery from any operational failures. **Reliability** is ensured by deploying across multiple subnets, which enhances fault tolerance and ensures high availability; this setup helps mitigate the risks associated with single points of failure, as other subnets can continue operating if one fails. **Performance Efficiency** is achieved by using an ALB to distribute incoming traffic across multiple EC2 instances, which efficiently handles the load and allows for scalability based on demand. Finally, **Cost Optimization** is addressed by the Auto Scaling mechanism that adjusts the number of instances in response to real-time demand, ensuring cost efficiency by paying only for the resources that are needed. This thoughtful configuration highlights a well-planned infrastructure that optimizes both resource use and operational costs. This architecture also complies with decoupling and independent scalability:
 
-##### Architecture
+1. **Decoupling**:
+   
+   The architecture demonstrates decoupling by separating the presentation layer (EC2 instances in public subnets), the application layer (EFS in app subnets), and the data layer (RDS in a private subnet). This separation ensures that components can fail or scale independently without impacting others.
 
-The architecture below is a well-structured, cost-effective AWS cloud deployment specifically tailored for a WordPress application in the US-East-1 region. It encompasses a Virtual Private Cloud (VPC) with an Internet Gateway, ensuring connectivity to and from the internet. Within this VPC, there are three public subnets, which host the EC2 instances running the WordPress application. These instances are managed by an Auto Scaling Group (ASG) to ensure scalability and reliability, adjusting the number of instances based on load to maintain performance while optimizing costs. An Application Load Balancer (ALB) distributes incoming traffic across these instances to enhance availability and fault tolerance.
+2. **Independent Scalability**:
+   
+   Each component (EC2, EFS, RDS) can scale independently. EC2 instances scale horizontally through the ASG, EFS scales automatically with the storage needs, and RDS can scale vertically or horizontally (read replicas) depending on the database workload.
 
-Additionally, the architecture includes three private application subnets where the Amazon Elastic File System (EFS) mount targets are located. This setup allows for shared file storage across the EC2 instances, facilitating a consistent and stateful deployment of WordPress resources like media files and themes across multiple servers. For database needs, a single Amazon RDS MySQL instance resides in one of the private subnets (DB A), which is isolated from direct internet access, enhancing security. This arrangement supports a robust, secure, and cost-efficient infrastructure for a WordPress-based portfolio project, ensuring that it can handle varying loads with minimal manual intervention.
-
-![Web Server.png](https://github.com/GuillenDiego/Cloud_Projects/blob/main/Web%20Server/Web%20Server.png?raw=true)
-
-##### VPC
-
-##### RDS MySQL Database
-
-##### EFS File System
-
-##### Systems Manager Parameter Store
-
-##### EC2 Amazon Load Balancer
-
-##### EC2 AutoScaling
-
-Upload
 
 ### User Data
 
@@ -176,3 +153,10 @@ sudo find /var/www/html -type f -exec chmod 0664 {} \;
 
 echo "WordPress installation completed successfully."
 ```
+### Expected Outcomes
+
+- Enhanced user experience due to reduced load times and improved website responsiveness.
+- Increased uptime and availability, ensuring that the website is always accessible to users.
+- Scalability to handle peak loads during high traffic periods without compromising on performance.
+
+By leveraging AWS's robust cloud infrastructure and services, we will deliver a resilient, scalable, and high-performance website that aligns with the dynamic needs of Amati Marketing.
