@@ -1,0 +1,210 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation template to create a Lambda function for meeting summarization
+
+Resources:
+  SummarizeMeetingRole:
+    Type: 'AWS::IAM::Role'
+    Properties: 
+      RoleName: 'summarize-meeting-role'
+      AssumeRolePolicyDocument: 
+        Version: '2012-10-17'
+        Statement: 
+          - Effect: 'Allow'
+            Principal: 
+              Service: 
+                - 'lambda.amazonaws.com'
+            Action: 
+              - 'sts:AssumeRole'
+      ManagedPolicyArns: 
+        - 'arn:aws:iam::aws:policy/AmazonS3FullAccess'
+        - 'arn:aws:iam::aws:policy/AmazonTranscribeFullAccess'
+        - 'arn:aws:iam::aws:policy/CloudWatchFullAccess'
+      Tags:
+        - Key: 'app'
+          Value: 'meeting-summarizer'
+        - Key: 'name'
+          Value: 'summarize-meeting-role'
+
+  TranscribeAudioFunction:
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      FunctionName: 'transcribe-audio'
+      Handler: 'index.lambda_handler'
+      Runtime: 'python3.12'
+      Role: !GetAtt SummarizeMeetingRole.Arn
+      Code:
+        ZipFile: |
+          import boto3
+          import uuid
+          import json
+
+          def lambda_handler(event, context):
+              print(json.dumps(event))
+              
+              record = event['Records'][0]
+              
+              s3bucket = record['s3']['bucket']['name']
+              s3object = record['s3']['object']['key']
+              
+              s3Path = f's3://{s3bucket}/{s3object}'
+              jobName = f'{s3object}--{str(uuid.uuid4())}'
+              outputKey = f'transcripts/{s3object}-transcript.json'
+              
+              client = boto3.client('transcribe')
+              
+              response = client.start_transcription_job(
+                  TranscriptionJobName=jobName,
+                  LanguageCode='en-US',
+                  Media={'MediaFileUri': s3Path},
+                  OutputBucketName=s3bucket,
+                  OutputKey=outputKey
+              )
+              
+              print (json.dumps(response, default=str))
+              
+              return {
+                  'TranscriptionJobName': response['TranscriptionJob']['TranscriptionJobName']
+              }
+      MemorySize: 128
+      Timeout: 60
+      Tags:
+        - Key: 'app'
+          Value: 'meeting-summarizer'
+        - Key: 'name'
+          Value: 'transcribe-audio-function'
+
+  SummarizeTranscriptionFunction:
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      FunctionName: 'summarize-transcription'
+      Handler: 'index.lambda_handler'
+      Runtime: 'python3.9'
+      Role: !GetAtt SummarizeMeetingRole.Arn
+      Code:
+        ZipFile: |
+          import boto3
+          import json
+          import os
+          import logging
+          from openai import OpenAI
+
+          # Configure logging to display INFO level messages
+          logging.basicConfig(level=logging.INFO)
+
+
+          def lambda_handler(event, context):
+              """
+              AWS Lambda function handler. This function is triggered by an S3 event.
+              It downloads a JSON file from S3, processes the content, and uploads a summary to S3.
+
+              Args:
+                  event (dict): Event data passed by the trigger (S3 event in this case).
+                  context (object): Runtime information provided by AWS Lambda.
+              """
+              print(json.dumps(event))
+
+              try:
+                  # Log the incoming event for debugging purposes
+                  logging.info("Received event: %s", json.dumps(event))
+
+                  # Extract S3 bucket and object key from the event
+                  record = event['Records'][0]
+                  s3bucket = record['s3']['bucket']['name']
+                  s3object = record['s3']['object']['key']
+
+                  # Initialize S3 client
+                  s3_client = boto3.client('s3')
+
+                  # Temporary file path for downloaded JSON file
+                  temp_file = '/tmp/tempfile.json'
+                  try:
+                      # Download the file from S3 to the temporary file path
+                      s3_client.download_file(s3bucket, s3object, temp_file)
+                  except ClientError as e:
+                      logging.error(f"Error downloading file from S3: {str(e)}")
+                      raise
+
+                  # Read the content of the downloaded JSON file
+                  with open(temp_file, 'r') as file:
+                      file_content = json.load(file)
+
+                  # Extract transcripts from the results key
+                  transcripts_list = file_content.get(
+                      'results', {}).get('transcripts', '')
+                  if not transcripts_list:
+                      raise ValueError("Transcripts not found in the JSON file.")
+
+                  transcript = transcripts_list[0].get('transcript', '')
+                  if not transcript:
+                      raise ValueError("Transcript text not found in the JSON file.")
+
+                  # Prepare file name by removing extension and path
+                  file_name = s3object.split('/')[-1]
+                  meeting_name = file_name.replace('.mp3-transcript.json', '')
+
+                  # Define the S3 key for the summary output
+                  outputKey = f'summary/{meeting_name}-summary.json'
+
+                  # Retrieve the OpenAI API key from environment variables
+                  api_key = os.getenv('OPENAI_API_KEY')
+                  if not api_key:
+                      raise ValueError("OpenAI API key not found.")
+
+                  # Initialize OpenAI client with the API key
+                  client = OpenAI(api_key=api_key)
+
+                  # Prepare messages for the OpenAI API call
+                  messages = [
+                      {"role": "system", "content": "You are a helpful assistant."},
+                      {"role": "user", "content": f"Summarize the following transcript giving bullet points: {transcript}"}
+                  ]
+
+                  # Call OpenAI API to create a summary
+                  completion = client.chat.completions.create(
+                      model="gpt-4", messages=messages, max_tokens=250)
+                  response = completion.choices[0].message.content
+
+                  # Upload the summary response to the specified S3 bucket
+                  try:
+                      s3_client.put_object(
+                          Bucket=s3bucket,
+                          Key=outputKey,
+                          Body=json.dumps({"response": response}),
+                          ContentType='application/json'
+                      )
+                  except ClientError as e:
+                      logging.error(f"Error uploading to S3: {str(e)}")
+                      raise
+
+                  return {"statusCode": 200, "body": json.dumps({"response": response})}
+              except Exception as e:
+                  logging.error(f"Error: {str(e)}")
+                  return {'statusCode': 500, 'body': json.dumps({'error': str(e)})}
+      MemorySize: 128
+      Timeout: 60
+      Tags:
+        - Key: 'app'
+          Value: 'meeting-summarizer'
+        - Key: 'name'
+          Value: 'summarize-transcription-function'
+
+  RecordingS3Bucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: !Sub 'recordings-summarizer-bucket${AWS::AccountId}'
+
+
+
+Outputs:
+  TranscribeAudioFunctionName:
+    Description: 'Name of the Lambda function created for audio transcription'
+    Value: !Ref TranscribeAudioFunction
+  TranscribeAudioFunctionArn:
+    Description: 'ARN of the Lambda function created for audio transcription'
+    Value: !GetAtt TranscribeAudioFunction.Arn
+  SummarizeTranscriptionFunctionName:
+    Description: 'Name of the Lambda function created for transcription summarization'
+    Value: !Ref SummarizeTranscriptionFunction
+  SummarizeTranscriptionFunctionArn:
+    Description: 'ARN of the Lambda function created for transcription summarization'
+    Value: !GetAtt SummarizeTranscriptionFunction.Arn

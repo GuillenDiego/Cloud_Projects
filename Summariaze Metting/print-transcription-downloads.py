@@ -2,6 +2,11 @@ import os
 import glob
 import json
 
+# This script prints transcriptions from JSON files located in the Downloads folder.
+# It allows the user to select the most recent files and display their transcript content.
+
+#Directory of downloads folder.
+directory = r'downloads_folder_path'
 
 def get_last_n_files(directory, n, extension):
     # Get list of files with the specified extension sorted by modification time
@@ -19,13 +24,16 @@ def print_transcript_from_json(file_path):
             transcripts = data['results']['transcripts']
             for transcript in transcripts:
                 print(transcript.get('transcript', 'No transcript found'))
+        elif 'response' in data:
+            print(data.get('response'))
         else:
-            print("No transcript field found in JSON data.")
+            print("No transcript or response field found in JSON data.")
+
     print('\n' + '-'*50 + '\n')
 
 
 def main():
-    directory = r'C:\Users\Dguillen\Downloads'
+    
     num_files = 3
     extension = 'json'
 
