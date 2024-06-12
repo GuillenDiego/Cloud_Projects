@@ -1,0 +1,196 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Deploying a VM in AWS Using the Terraform Workflow
+Parameters:
+  LatestAmiId:
+    Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
+    Default: /aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2
+Resources:
+  IGW:
+    Type: 'AWS::EC2::InternetGateway'
+    Properties:
+      Tags:
+        - Key: Name
+          Value: Terraform-amati-IGW
+  VPC:
+    Type: 'AWS::EC2::VPC'
+    Properties:
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      CidrBlock: 10.0.0.0/16
+      Tags:
+        - Key: Name
+          Value: !Ref 'AWS::StackName'
+        - Key: Purpose
+          Value: Terraform-amati-VPC
+  IGWAttach:
+    Type: 'AWS::EC2::VPCGatewayAttachment'
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref IGW
+  RouteTable:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref VPC
+  InternetRoute:
+    Type: 'AWS::EC2::Route'
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref IGW
+      RouteTableId: !Ref RouteTable
+  SubnetRouteAssociationA:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      RouteTableId: !Ref RouteTable
+      SubnetId: !Ref SubnetA
+  SG:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: SG for Terraform amati
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: Terrafor-amati-SG
+  SubnetA:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select 
+        - '0'
+        - !GetAZs 
+          Ref: 'AWS::Region'
+      CidrBlock: 10.0.1.0/24
+      Tags:
+        - Key: Name
+          Value: SubnetA
+      MapPublicIpOnLaunch: true
+  EC2SecurityIngress:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      FromPort: 22
+      GroupId: !GetAtt 
+        - SG
+        - GroupId
+      ToPort: 22
+      CidrIp: 0.0.0.0/0
+      IpProtocol: tcp
+  TerraformRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      Path: /
+      RoleName: TerraformRole
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action: 'sts:AssumeRole'
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+      Policies:
+        - PolicyName: CustomPolicyamati
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Sid: Stmt1591121535953
+                Action:
+                  - 'ec2:*'
+                Effect: Allow
+                Resource: '*'
+  AccessKey:
+    Type: 'AWS::IAM::AccessKey'
+    Properties:
+      UserName: cloud_user
+  EC2InstanceProfile:
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
+      Path: /
+      Roles:
+        - !Ref TerraformRole
+  TerraformController:
+    Type: 'AWS::EC2::Instance'
+    CreationPolicy:
+      ResourceSignal:
+        Count: '1'
+        Timeout: PT12M
+    Properties:
+      ImageId: ami-046fc64ce51e6ccab
+      InstanceType: t3.micro
+      Tags:
+        - Key: Name
+          Value: TerraformController
+      SecurityGroupIds:
+        - !Ref SG
+      IamInstanceProfile: !Ref EC2InstanceProfile
+      SubnetId: !Ref SubnetA
+      UserData: !Base64 
+        'Fn::Join':
+          - ''
+          - - |
+              #!/bin/bash
+            - |
+              yum -y install git wget jq unzip gcc yum-utils
+            - >
+              yum-config-manager --add-repo
+              https://rpm.releases.hashicorp.com/AmazonLinux/hashicorp.repo
+            - |
+              yum -y install terraform
+            - |
+              echo 'Dji9(id&' | sudo passwd --stdin cloud_user
+            - |
+              sudo service sshd restart
+            - 'sudo -iu cloud_user aws configure set default.region '
+            - !Ref 'AWS::Region'
+            - |+
+
+            - >
+              curl -o kubectl
+              https://amazon-eks.s3-us-west-2.amazonaws.com/1.21.2/2021-07-05/bin/linux/amd64/kubectl
+            - |
+              chmod +x kubectl
+            - |
+              mv kubectl /usr/bin/kubectl
+            - |
+              yum -y remove aws-cli
+            - >
+              curl https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o
+              awscliv2.zip && unzip awscliv2.zip && sudo ./aws/install
+            - |
+              rm -rf awscliv2.zip
+            - |
+              chown -R cloud_user:cloud_user /home/cloud_user/amati_code
+            - |
+              su - cloud_user -c 'cd /home/cloud_user/'
+            - >
+              su - cloud_user -c 'wget
+              https://raw.githubusercontent.com/ACloudGuru-Resources/content-terraform-2021/main/lab-terraform-eks-2.zip'
+            - |
+              su - cloud_user -c 'unzip lab-terraform-eks-2.zip'
+            - 'echo ''ami: '''
+            - !Ref LatestAmiId
+            - |
+              >> /home/cloud_user/resource_ids.txt
+            - 'echo ''subnet_id: '''
+            - !Ref SubnetA
+            - |
+              >> /home/cloud_user/resource_ids.txt
+            - >-
+              /opt/aws/bin/cfn-signal --exit-code 0 --resource
+              TerraformController --region 
+            - !Ref 'AWS::Region'
+            - ' '
+            - '--stack '
+            - !Ref 'AWS::StackName'
+Outputs:
+  pubIpAddress1:
+    Description: Terraform-Controller
+    Value: !GetAtt 
+      - TerraformController
+      - PublicIp
+  pubIpAddress2:
+    Description: cloud_user Access Key
+    Value: !Ref AccessKey
+  pubIpAddress3:
+    Description: cloud_user Secret Access Key
+    Value: !GetAtt 
+      - AccessKey
+      - SecretAccessKey
