@@ -186,10 +186,10 @@ Outputs:
     Value: !GetAtt 
       - TerraformController
       - PublicIp
-  pubIpAddress2:
+  accessKey:
     Description: cloud_user Access Key
     Value: !Ref AccessKey
-  pubIpAddress3:
+  secretAccessKey:
     Description: cloud_user Secret Access Key
     Value: !GetAtt 
       - AccessKey
