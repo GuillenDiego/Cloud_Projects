@@ -8,7 +8,7 @@
     },
     "Username": {
       "Type": "String",
-      "Default": "cloud_user",
+      "Default": "amati_user",
       "Description": "The username for the EC2 instance"
     }
   },
@@ -181,12 +181,6 @@
         ]
       }
     },
-    "AccessKey": {
-      "Type": "AWS::IAM::AccessKey",
-      "Properties": {
-        "UserName": {"Ref": "Username"}
-      }
-    },
     "EC2InstanceProfile": {
       "Type": "AWS::IAM::InstanceProfile",
       "Properties": {
@@ -250,8 +244,8 @@
                 "rm -rf awscliv2.zip\n",
                 "chown -R ", {"Ref": "Username"}, ":", {"Ref": "Username"}, " /home/", {"Ref": "Username"}, "/amati_code\n",
                 "su - ", {"Ref": "Username"}, " -c 'cd /home/", {"Ref": "Username"}, "/'\n",
-                "su - ", {"Ref": "Username"}, " -c 'wget https://raw.githubusercontent.com/ACloudGuru-Resources/content-terraform-2021/main/lab-terraform-eks-2.zip'\n",
-                "su - ", {"Ref": "Username"}, " -c 'unzip lab-terraform-eks-2.zip'\n",
+                "su - ", {"Ref": "Username"}, " -c 'wget https://raw.githubusercontent.com/GuillenDiego/Cloud_Projects/main/Terraform-EKS/Terraform.zip'\n",
+                "su - ", {"Ref": "Username"}, " -c 'unzip Terraform.zip'\n",
                 "echo 'ami: '",
                 {
                   "Ref": "LatestAmiId"
@@ -285,21 +279,6 @@
         "Fn::GetAtt": [
           "TerraformController",
           "PublicIp"
-        ]
-      }
-    },
-    "userAccessKey": {
-      "Description": "user Access Key",
-      "Value": {
-        "Ref": "AccessKey"
-      }
-    },
-    "userSecretAccessKey": {
-      "Description": "user Secret Access Key",
-      "Value": {
-        "Fn::GetAtt": [
-          "AccessKey",
-          "SecretAccessKey"
         ]
       }
     }
