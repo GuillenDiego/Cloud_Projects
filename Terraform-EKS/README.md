@@ -21,10 +21,14 @@ Configure `kubectl` to interact with the cluster:
 ```
 aws eks --region $(terraform output -raw region) update-kubeconfig --name $(terraform output -raw cluster_name)
 ```
+
+
 Confirm that `kubectl` was configured properly and that the cluster was successfully deployed:
 ```
 kubectl get cs
 ```
+
+### Deploy Pods
 The all the components should be up and running with a status of `Healthy`.
 
 Confirm that the NGINX pods were successfully deployed:

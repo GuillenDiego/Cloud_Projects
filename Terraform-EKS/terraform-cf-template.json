@@ -181,6 +181,12 @@
         ]
       }
     },
+    "AccessKey": {
+      "Type": "AWS::IAM::AccessKey",
+      "Properties": {
+        "UserName": {"Ref": "Username"}
+      }
+    },
     "EC2InstanceProfile": {
       "Type": "AWS::IAM::InstanceProfile",
       "Properties": {
@@ -279,6 +285,21 @@
         "Fn::GetAtt": [
           "TerraformController",
           "PublicIp"
+        ]
+      }
+    },
+    "userAccessKey": {
+      "Description": "user Access Key",
+      "Value": {
+        "Ref": "AccessKey"
+      }
+    },
+    "userSecretAccessKey": {
+      "Description": "user Secret Access Key",
+      "Value": {
+        "Fn::GetAtt": [
+          "AccessKey",
+          "SecretAccessKey"
         ]
       }
     }
