@@ -5,6 +5,11 @@
     "LatestAmiId": {
       "Type": "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>",
       "Default": "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2"
+    },
+    "Username": {
+      "Type": "String",
+      "Default": "cloud_user",
+      "Description": "The username for the EC2 instance"
     }
   },
   "Resources": {
@@ -14,7 +19,7 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": "Terraform-Lab-IGW"
+            "Value": "Terraform-Amati-IGW"
           }
         ]
       }
@@ -34,7 +39,7 @@
           },
           {
             "Key": "Purpose",
-            "Value": "Terraform-Lab-VPC"
+            "Value": "Terraform-Amati-VPC"
           }
         ]
       }
@@ -84,14 +89,14 @@
     "SG": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
-        "GroupDescription": "SG for Terraform Lab",
+        "GroupDescription": "SG for Terraform Amati",
         "VpcId": {
           "Ref": "VPC"
         },
         "Tags": [
           {
             "Key": "Name",
-            "Value": "Terrafor-Lab-SG"
+            "Value": "Terraform-Amati-SG"
           }
         ]
       }
@@ -158,7 +163,7 @@
         },
         "Policies": [
           {
-            "PolicyName": "CustomPolicyLab",
+            "PolicyName": "CustomPolicyAmati",
             "PolicyDocument": {
               "Version": "2012-10-17",
               "Statement": [
@@ -179,7 +184,7 @@
     "AccessKey": {
       "Type": "AWS::IAM::AccessKey",
       "Properties": {
-        "UserName": "cloud_user"
+        "UserName": {"Ref": "Username"}
       }
     },
     "EC2InstanceProfile": {
@@ -230,12 +235,12 @@
                 "yum -y install git wget jq unzip gcc yum-utils\n",
                 "yum-config-manager --add-repo https://rpm.releases.hashicorp.com/AmazonLinux/hashicorp.repo\n",
                 "yum -y install terraform\n",
-                "echo 'Vvl3l]-s' | sudo passwd --stdin cloud_user\n",
+                "echo '@MA@7!Eek5' | sudo passwd --stdin ", {"Ref": "Username"}, "\n",
                 "sudo service sshd restart\n",
-                "sudo -iu cloud_user aws configure set default.region ",
+                "sudo -iu ", {"Ref": "Username"}, " aws configure set default.region ", 
                 {
                   "Ref": "AWS::Region"
-                },
+                }, 
                 "\n",
                 "curl -o kubectl https://amazon-eks.s3-us-west-2.amazonaws.com/1.21.2/2021-07-05/bin/linux/amd64/kubectl\n",
                 "chmod +x kubectl\n",
@@ -243,20 +248,20 @@
                 "yum -y remove aws-cli\n",
                 "curl https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o awscliv2.zip && unzip awscliv2.zip && sudo ./aws/install\n",
                 "rm -rf awscliv2.zip\n",
-                "chown -R cloud_user:cloud_user /home/cloud_user/lab_code\n",
-                "su - cloud_user -c 'cd /home/cloud_user/'\n",
-                "su - cloud_user -c 'wget https://raw.githubusercontent.com/ACloudGuru-Resources/content-terraform-2021/main/lab-terraform-eks-2.zip'\n",
-                "su - cloud_user -c 'unzip lab-terraform-eks-2.zip'\n",
+                "chown -R ", {"Ref": "Username"}, ":", {"Ref": "Username"}, " /home/", {"Ref": "Username"}, "/amati_code\n",
+                "su - ", {"Ref": "Username"}, " -c 'cd /home/", {"Ref": "Username"}, "/'\n",
+                "su - ", {"Ref": "Username"}, " -c 'wget https://raw.githubusercontent.com/ACloudGuru-Resources/content-terraform-2021/main/lab-terraform-eks-2.zip'\n",
+                "su - ", {"Ref": "Username"}, " -c 'unzip lab-terraform-eks-2.zip'\n",
                 "echo 'ami: '",
                 {
                   "Ref": "LatestAmiId"
                 },
-                ">> /home/cloud_user/resource_ids.txt\n",
+                ">> /home/", {"Ref": "Username"}, "/resource_ids.txt\n",
                 "echo 'subnet_id: '",
                 {
                   "Ref": "SubnetA"
                 },
-                ">> /home/cloud_user/resource_ids.txt\n",
+                ">> /home/", {"Ref": "Username"}, "/resource_ids.txt\n",
                 "/opt/aws/bin/cfn-signal --exit-code 0 --resource TerraformController --region ",
                 {
                   "Ref": "AWS::Region"
@@ -274,7 +279,7 @@
     }
   },
   "Outputs": {
-    "pubIpAddress1": {
+    "pubIpAddress": {
       "Description": "Terraform-Controller",
       "Value": {
         "Fn::GetAtt": [
@@ -283,14 +288,14 @@
         ]
       }
     },
-    "pubIpAddress2": {
-      "Description": "cloud_user Access Key",
+    "userAccessKey": {
+      "Description": "user Access Key",
       "Value": {
         "Ref": "AccessKey"
       }
     },
-    "pubIpAddress3": {
-      "Description": "cloud_user Secret Access Key",
+    "userSecretAccessKey": {
+      "Description": "user Secret Access Key",
       "Value": {
         "Fn::GetAtt": [
           "AccessKey",
