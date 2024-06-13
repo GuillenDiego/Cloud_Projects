@@ -2,7 +2,7 @@ data "terraform_remote_state" "eks" {
   backend = "local"
 
   config = {
-    path = "../lab-terraform-eks-2/terraform.tfstate"
+    path = "../Terraform/terraform.tfstate"
   }
 }
 
